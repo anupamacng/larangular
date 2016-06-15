@@ -7,6 +7,8 @@ use App\User;
 use App\Relationship;
 use Auth;
 use App\Services\DataService;
+use Exception;
+use Log;
 
 class UserController extends Controller
 {
@@ -24,11 +26,15 @@ class UserController extends Controller
 
 
     public function getUserListWithStatus($id){
-        
-            $dataserve = new DataService;
+        try{
+            // $dataserve = new DataService;
             $data = $dataserve->getUserList($id);
             $state= 200;
             return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('uri: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
     }
 
     /**
@@ -40,17 +46,21 @@ class UserController extends Controller
     public function store(Request $request)
     {
         //
-        $user = new User;
-
-        $user->name = $request->input('name');
-        $user->email = $request->input('email');
-        $user->password = bcrypt($request->input['password']);
-        $user->latitude = $request->input('latitude');
-        $user->longitude = $request->input('longitude');
-        $user->save();
-        $data = "Succefully updated ".$user->id;
-        $state= 200;
-        return response()->json(['data' => $data, 'state' => $state]);
+         try{
+            $user = new User;
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
+            $user->password = bcrypt($request->input['password']);
+            $user->latitude = $request->input('latitude');
+            $user->longitude = $request->input('longitude');
+            $user->save();
+            $data = "Succefully updated ".$user->id;
+            $state= 200;
+            return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('Issue with create user: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
     }
 
 
@@ -63,18 +73,23 @@ class UserController extends Controller
     public function login(Request $request)
     {
         //
-        $email = $request->input('email');
-        $password = $request->input['password'];
-        $remember =1;
-        if (Auth::attempt(['email' => $email, 'password' => $password], $remember)) {
-        $dataserve = new DataService;
-        $userInfo  = $dataserve->getUserPoint(Auth::user()->id);
-            // Authentication passed...
-            $data = $userInfo;
-            $state= 200;
+        try{
+            $email = $request->input('email');
+            $password = $request->input['password'];
+            $remember =1;
+            if (Auth::attempt(['email' => $email, 'password' => $password], $remember)) {
+            $dataserve = new DataService;
+            $userInfo  = $dataserve->getUserPoint(Auth::user()->id);
+                // Authentication passed...
+                $data = $userInfo;
+                $state= 200;
+                return response()->json(['data' => $data, 'state' => $state]);
+            }
             return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('Issue with login user: '.$ex);
+            return response()->json([ 'state' => 301]);
         }
-        return response()->json(['data' => $data, 'state' => $state]);
     }
 
     /**
@@ -84,11 +99,17 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function logout(Request $request)
-    {
+    {   
+        try
+        {
             Auth::logout();
             $data = "Succefully logged out ";
             $state= 200;
             return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('Issue with logout: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
     }
 
     /**
@@ -99,11 +120,15 @@ class UserController extends Controller
      */
     public function show($id)
     {
-        //
-        $user = User::find($id);
-        $data = $user;
-        $state= 200;
-        return response()->json(['data' => $data, 'state' => $state]);
+        try{
+            $user = User::find($id);
+            $data = $user;
+            $state= 200;
+            return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('Issue with logout: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
     }
 
 
@@ -114,11 +139,17 @@ class UserController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
-    {
-        $user = User::find($id);
-        $data = $user;
-        $state= 200;
-        return response()->json(['data' => $data, 'state' => $state]);
+    {   
+        try
+        {
+            $user = User::find($id);
+            $data = $user;
+            $state= 200;
+            return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('Issue with user edit: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
     }
 
     /**
@@ -130,17 +161,22 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $user = User::find($id);
-        $user->name = $request->input('name');
-        $user->email = $request->input('email');
-        $user->password = bcrypt($request->input['password']);
-        $user->latitude = $request->input('latitude');
-        $user->longitude = $request->input('longitude');
-        $user->save();
-        $data = "Succefully updated ".$user->id;
-        $state= 200;
-        return response()->json(['data' => $data, 'state' => $state]);
+        try
+        {
+            $user = User::find($id);
+            $user->name = $request->input('name');
+            $user->email = $request->input('email');
+            $user->password = bcrypt($request->input['password']);
+            $user->latitude = $request->input('latitude');
+            $user->longitude = $request->input('longitude');
+            $user->save();
+            $data = "Succefully updated ".$user->id;
+            $state= 200;
+            return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('Issue with updating user information: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
 
     }
 
@@ -163,18 +199,23 @@ class UserController extends Controller
      */
     public function sendFriendRequest(Request $request, $id)
     {
-
-        $status = 0;
-        $relation = new Relationship;
-        $friendId = $request->input('friend_id');
-        $relation->user_one_id = min($id,$friendId);
-        $relation->user_two_id = max($id,$friendId);
-        $relation->status = $status;
-        $relation->action_user_id   = $id;
-        $relation->save();
-        $data = "Done";
-        $state = 200;
-        return response()->json(['data' => $data, 'state' => $state]);
+        try
+        {
+            $status = 0;
+            $relation = new Relationship;
+            $friendId = $request->input('friend_id');
+            $relation->user_one_id = min($id,$friendId);
+            $relation->user_two_id = max($id,$friendId);
+            $relation->status = $status;
+            $relation->action_user_id   = $id;
+            $relation->save();
+            $data = "Done";
+            $state = 200;
+            return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('Issue with request friend: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
     }
 
      /**
@@ -185,14 +226,19 @@ class UserController extends Controller
      */
     public function respondFriendRequest(Request $request, $id)
     {
-        //
-        $status = $request->input('status');
-        $relationId = $request->input('request_id');
-        Relationship::where('id', '=', $relationId)
-            ->update(array('status' =>  $status,'action_user_id' =>  $id));
-        $data ='done';
-        $state = 200;
-        return response()->json(['data' => $data, 'state' => $state]);
+        try
+        {
+            $status = $request->input('status');
+            $relationId = $request->input('request_id');
+            Relationship::where('id', '=', $relationId)
+                ->update(array('status' =>  $status,'action_user_id' =>  $id));
+            $data ='done';
+            $state = 200;
+            return response()->json(['data' => $data, 'state' => $state]);
+        }catch(Exception $ex){
+            Log::error('Issue with respond to friend requst: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
     }
 
     /**
@@ -203,12 +249,20 @@ class UserController extends Controller
      */
     public function getFriendList($id)
     {
-        $dataserve = new DataService;
-        $userPoint  = $dataserve->getUserPoint($id);
-        // print_r($userPoint); die;
-        $data = $dataserve->getFriendList($id,$userPoint);
-        $state = 200;
-        return response()->json(['data' => $data, 'state' => $state]);
+        try
+        {
+            $dataserve = new DataService;
+            $userPoint  = $dataserve->getUserPoint($id);
+            // print_r($userPoint); die;
+            $data = $dataserve->getFriendList($id,$userPoint);
+            $state = 200;
+            return response()->json(['data' => $data, 'state' => $state]);
+        }
+        catch(Exception $ex)
+        {
+            Log::error('Issue with getFriendList: '.$ex);
+            return response()->json([ 'state' => 301]);
+        }
     }
 
 }

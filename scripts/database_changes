@@ -89,3 +89,11 @@ TABLE `relationships`
 
 ALTER TABLE `users`
   MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  ALTER TABLE `users` CHANGE `id` `id` INT(10) NOT NULL AUTO_INCREMENT;
+
+  ALTER TABLE `relationships` ADD UNIQUE `unique_index`(`user_one_id`, `user_two_id`);
+  ALTER TABLE relationships ADD CONSTRAINT fk_status FOREIGN KEY (status) REFERENCES def_status(id);
+  ALTER TABLE relationships ADD CONSTRAINT fk_user_one_id FOREIGN KEY (user_one_id) REFERENCES users(id);
+ALTER TABLE relationships ADD CONSTRAINT fk_user_two_id FOREIGN KEY (user_two_id) REFERENCES users(id);
+action_user_id
+
