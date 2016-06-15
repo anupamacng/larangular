@@ -25,7 +25,7 @@
           <form ng-submit="getLogin()">
           <input type="text" ng-model="user.email">
           <input type="password" ng-model="user.password">
-          <input type="submit" ng-click="getLogin(user)" value="Save" />
+          <input type="submit" ng-click="getLogin(user)" value="Login" />
           </form>
         </div>
 
